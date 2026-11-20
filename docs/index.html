@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Visitor Check-in · Turnstile Access Demo</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">▣</span>
+      <div>
+        <h1>Visitor Check-in</h1>
+        <p>Register, receive your QR pass, walk through the gate.</p>
+      </div>
+    </div>
+    <span id="modeBadge" class="badge">Checking mode…</span>
+  </header>
+
+  <main class="layout">
+    <!-- 1. Registration form -->
+    <section class="card" aria-labelledby="formTitle">
+      <h2 id="formTitle"><span class="step">1</span> Visitor details</h2>
+
+      <form id="visitorForm" novalidate>
+        <div class="field">
+          <label for="purpose">Purpose of visit <em>*</em></label>
+          <select id="purpose" name="purpose" required>
+            <option value="">Select a purpose…</option>
+            <option>Business meeting</option>
+            <option>Interview</option>
+            <option>Delivery / courier</option>
+            <option>Contractor / maintenance</option>
+            <option>Site tour</option>
+            <option>Personal visit</option>
+            <option>Other</option>
+          </select>
+          <small class="error" data-for="purpose"></small>
+        </div>
+
+        <div class="field" id="otherWrap" hidden>
+          <label for="otherPurpose">Please specify <em>*</em></label>
+          <input id="otherPurpose" name="otherPurpose" type="text" maxlength="80">
+          <small class="error" data-for="otherPurpose"></small>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label for="fullName">Full name <em>*</em></label>
+            <input id="fullName" name="fullName" type="text" autocomplete="name" maxlength="80" required>
+            <small class="error" data-for="fullName"></small>
+          </div>
+          <div class="field">
+            <label for="company">Company / organisation</label>
+            <input id="company" name="company" type="text" autocomplete="organization" maxlength="80">
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="field field-phone">
+            <label for="phone">Contact number <em>*</em></label>
+            <div class="phone-group">
+              <select id="countryCode" aria-label="Country code">
+                <option value="65" selected>🇸🇬 +65</option>
+                <option value="60">🇲🇾 +60</option>
+                <option value="91">🇮🇳 +91</option>
+                <option value="44">🇬🇧 +44</option>
+                <option value="1">🇺🇸 +1</option>
+                <option value="61">🇦🇺 +61</option>
+                <option value="86">🇨🇳 +86</option>
+                <option value="971">🇦🇪 +971</option>
+              </select>
+              <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="9123 4567" required>
+            </div>
+            <small class="error" data-for="phone"></small>
+          </div>
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" autocomplete="email" maxlength="120">
+            <small class="error" data-for="email"></small>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label for="host">Person / department to visit <em>*</em></label>
+            <input id="host" name="host" type="text" maxlength="80" required>
+            <small class="error" data-for="host"></small>
+          </div>
+          <div class="field">
+            <label for="idNumber">ID / passport (last 4 chars)</label>
+            <input id="idNumber" name="idNumber" type="text" maxlength="4" placeholder="123A">
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label for="visitDate">Visit date <em>*</em></label>
+            <input id="visitDate" name="visitDate" type="date" required>
+            <small class="error" data-for="visitDate"></small>
+          </div>
+          <div class="field">
+            <label for="vehicle">Vehicle plate (optional)</label>
+            <input id="vehicle" name="vehicle" type="text" maxlength="12" style="text-transform:uppercase">
+          </div>
+        </div>
+
+        <label class="check">
+          <input id="consent" type="checkbox" required>
+          <span>I agree to the processing of my details for access control and to receive my pass by SMS. <em>*</em></span>
+        </label>
+        <small class="error" data-for="consent"></small>
+
+        <button id="submitBtn" class="btn primary" type="submit">Submit &amp; send QR to my phone</button>
+      </form>
+    </section>
+
+    <!-- 2. Phone preview -->
+    <section class="card" aria-labelledby="phoneTitle">
+      <h2 id="phoneTitle"><span class="step">2</span> Visitor's phone</h2>
+      <div class="phone" aria-live="polite">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="phone-head">Messages · <strong>GATE-ACCESS</strong></div>
+          <div id="phoneEmpty" class="phone-empty">No new messages.<br>Submit the form to receive your pass.</div>
+          <div id="phoneSending" class="phone-empty" hidden>
+            <span class="spinner" aria-hidden="true"></span> Sending SMS…
+          </div>
+          <div id="phoneMsg" class="bubble" hidden>
+            <p id="smsText"></p>
+            <div id="qrBox" class="qr-box"></div>
+            <p class="bubble-meta" id="smsMeta"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Turnstile simulator -->
+    <section class="card" aria-labelledby="gateTitle">
+      <h2 id="gateTitle"><span class="step">3</span> Turnstile gate (simulator)</h2>
+
+      <div id="gate" class="gate locked" role="status" aria-live="assertive">
+        <div class="gate-visual" aria-hidden="true">
+          <div class="post"></div>
+          <div class="arm"></div>
+          <div class="post right"></div>
+        </div>
+        <div class="gate-light"><span id="gateLabel">LOCKED</span></div>
+      </div>
+
+      <label for="scanInput" class="scan-label">QR scanner input</label>
+      <div class="scan-row">
+        <input id="scanInput" type="text" placeholder="Pass code appears here after submit" autocomplete="off">
+        <button id="scanBtn" class="btn" type="button">Scan at gate</button>
+      </div>
+      <p class="hint">Each pass is single-entry and expires at the end of the visit date.</p>
+
+      <h3>Gate log</h3>
+      <ul id="gateLog" class="log"><li class="muted">No activity yet.</li></ul>
+    </section>
+  </main>
+
+  <footer class="foot">Demo project · front-end simulates SMS &amp; gate; connect <code>server/</code> for real SMS and hardware.</footer>
+
+  <script src="js/qrcode.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

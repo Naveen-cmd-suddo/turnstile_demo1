@@ -1,0 +1,15 @@
+{
+  "name": "turnstile-visitor-demo",
+  "version": "1.0.0",
+  "description": "Visitor check-in demo: form -> QR pass by SMS -> turnstile gate access",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "static": "npx http-server docs -p 8080 -c-1"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.19.2",
+    "twilio": "^5.3.0"
+  }
+}

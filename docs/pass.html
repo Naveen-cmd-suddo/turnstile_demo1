@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Your visitor pass</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="card pass-page">
+    <h2 style="justify-content:center">Your visitor pass</h2>
+    <p id="msg" class="hint">Loading…</p>
+    <div id="qrBox" class="qr-box" hidden></div>
+    <p class="hint">Show this QR code at the turnstile scanner.</p>
+  </main>
+  <script src="js/qrcode.js"></script>
+  <script>
+    // Opened from the SMS link: pass.html?c=VG1.<id>.<token>
+    const code = new URLSearchParams(location.search).get('c');
+    const msg = document.getElementById('msg');
+    if (code && /^VG1\.[A-Z0-9]+\.[a-f0-9]+$/i.test(code)) {
+      const qr = qrcode(0, 'M'); qr.addData(code); qr.make();
+      const box = document.getElementById('qrBox');
+      box.innerHTML = qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
+      box.hidden = false;
+      msg.textContent = 'Pass ready';
+    } else {
+      msg.textContent = 'Invalid or missing pass link.';
+    }
+  </script>
+</body>
+</html>
